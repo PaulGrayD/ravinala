@@ -18,9 +18,7 @@
   box-shadow:0 0 12px rgba(0,0,0,0.2);
 ">
 
-  <h2 style="margin-bottom:10px; font-size:20px;">
-    ✈️ Jeu du Pendu - RAVINALA AIRPORT
-  </h2>
+  <h2 style=" margin-bottom:10px; font-size:20px;">  ✈️ Jeu du Pendu - RAVINALA AIRPORT </h2>
 
   <p id="hint" style="font-style:italic; color:#003366; font-size:13px; margin-bottom:10px;"></p>
 
@@ -34,8 +32,7 @@
     display:inline-block;
   "></p>
 
-  <p style="margin:8px 0; font-size:13px;">
-    Lettres incorrectes :
+  <p style="margin:8px 0; font-size:13px;">Lettres incorrectes : 
     <span id="wrong-letters" style="
       color:red; 
       font-weight:bold; 
@@ -47,8 +44,7 @@
     "></span>
   </p>
 
-  <p style="margin:8px 0; font-size:13px;">
-    Vies restantes :
+  <p style="margin:8px 0; font-size:13px;">Vies restantes : 
     <span id="lives" style="
       font-weight:bold; 
       color:#003366;
@@ -61,7 +57,7 @@
   </p>
 
   <div id="hangman-draw" style="margin:10px 0;">
-    <img id="plane-img" src="https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_1.png" style="width:150px;">
+    <img id="plane-img" src="https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/9.jpg" style="width:150px;">
   </div>
 
   <div style="margin:8px 0;">
@@ -96,12 +92,17 @@
       cursor:pointer;
       transition: all 0.3s ease;
       box-shadow:0 2px 4px rgba(0,0,0,0.2);
-    ">
+    "
+    onmouseover="this.style.background='#ff8533'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.3)';"
+    onmouseout="this.style.background='#ff6600'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.2)';"
+    >
       Recommencer
     </button>
   </div>
 
-  <div id="keyboard" style="margin-top:10px;"></div>
+  <div id="keyboard" style="margin-top:10px;">
+    <!-- Clavier AZERTY généré en JS -->
+  </div>
 
   <p id="message" style="font-size:15px; color:green; margin-top:8px;"></p>
 
@@ -114,7 +115,6 @@
 
 <script>
 (function() {
-
   const words = [
     {word:"avion", hint:"Le transporteur principal des passagers."},
     {word:"terminal", hint:"Bâtiment principal de l'aéroport."},
@@ -124,13 +124,14 @@
   ];
 
   const planeStages = [
-    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_1.png",
-    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_3.png",
-    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_4.png",
-    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_5.png",
-    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_6.png",
-    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_7.png",
-    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/avion_8.png"
+    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/9.jpg",
+    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/10.jpg",
+    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/11.jpg",
+    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/12.jpg",
+    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/Paul-1.jpg",
+    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/13.jpg",
+    "https://ravinala-airports.makeitpulse.app/wp-content/uploads/2026/03/14.jpg",
+    
   ];
 
   let selectedWordObj = {};
@@ -156,12 +157,14 @@
     ["w","x","c","v","b","n"]
   ];
 
+  let keyboardButtons = [];
+
   function createKeyboard(){
     keyboardDiv.innerHTML = "";
+    keyboardButtons = [];
     azertyKeys.forEach(row=>{
       const rowDiv = document.createElement("div");
       rowDiv.style.margin="2px 0";
-
       row.forEach(letter=>{
         const btn = document.createElement("button");
         btn.textContent = letter.toUpperCase();
@@ -172,27 +175,29 @@
         btn.style.border="1px solid #003366";
         btn.style.background="#f0f8ff";
         btn.style.cursor="pointer";
-
-        btn.addEventListener("click", ()=>handleLetter(letter));
+        btn.addEventListener("click", ()=>{
+          handleLetter(letter);
+          btn.disabled = true;
+          btn.style.opacity = "0.4";
+          btn.style.cursor = "not-allowed";
+        });
         rowDiv.appendChild(btn);
+        keyboardButtons.push(btn);
       });
-
       keyboardDiv.appendChild(rowDiv);
     });
   }
 
   function handleLetter(letter){
     if(gameOver) return;
-
     if(selectedWordObj.word.includes(letter)){
       if(!correctLetters.includes(letter)) correctLetters.push(letter);
-    } else {
+    }else{
       if(!wrongLetters.includes(letter)){
         wrongLetters.push(letter);
         lives--;
       }
     }
-
     updateDisplay();
     checkGame();
   }
@@ -203,12 +208,17 @@
     wrongLetters = [];
     lives = 6;
     gameOver = false;
-
     messageEl.textContent="";
     winLink.style.display="none";
     hintEl.textContent="Indice : "+selectedWordObj.hint;
 
-    createKeyboard();
+    // Réinitialiser le clavier
+    keyboardButtons.forEach(btn=>{
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
+    });
+
     updateDisplay();
   }
 
@@ -232,7 +242,6 @@
       winLink.style.display="inline-block";
       gameOver = true;
     }
-
     if(lives <= 0){
       messageEl.textContent="💥 Crash ! Le mot était : "+selectedWordObj.word;
       lives = 0;
@@ -246,16 +255,14 @@
   inputEl.addEventListener("keyup", function(e){
     const letter = e.target.value.toLowerCase();
     e.target.value="";
-
     if(letter.match(/[a-z]/) && letter.length===1){
       handleLetter(letter);
     }
   });
 
+  createKeyboard();
   startGame();
-
 })();
 </script>
-
 </body>
 </html>
